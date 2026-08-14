@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DSH Computer Use · 后台控制浏览器与 macOS</title>
+  <meta name="description" content="面向 DSH 的文本优先 Computer Use。后台控制 Chromium 与 macOS 窗口，不抢前台，不移动用户的鼠标。">
+  <meta name="theme-color" content="#f7f8f8">
+  <meta property="og:title" content="DSH Computer Use">
+  <meta property="og:description" content="后台控制 Chromium 与 macOS 窗口，不抢前台，不移动用户的鼠标。">
+  <meta property="og:image" content="https://computer-use.zrui.tech/assets/setup-center.png">
+  <link rel="canonical" href="https://computer-use.zrui.tech/">
+  <link rel="icon" type="image/png" href="assets/app-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DSH Computer Use",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS 14 or later",
+      "softwareVersion": "0.3.0",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  </script>
+</head>
+<body>
+  <nav class="nav" id="nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="DSH Computer Use 首页">
+        <img src="assets/app-icon.png" width="34" height="34" alt="">
+        <span>DSH Computer Use</span>
+        <small>0.3.0</small>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#install">安装</a>
+        <a href="#capabilities">能力</a>
+        <a href="#architecture">原理</a>
+        <a href="#developer">开发</a>
+      </div>
+      <div class="nav-actions">
+        <a class="button button-quiet compact" data-repo-link href="https://github.com/ZRui-C/dsh-computer-use">源码</a>
+        <a class="button button-primary compact" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载</a>
+        <button class="nav-toggle" id="navToggle" type="button" aria-label="打开菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="container hero-inner">
+      <p class="eyebrow"><span></span> macOS 14+ · Universal 2</p>
+      <h1>DSH Computer Use</h1>
+      <p class="hero-lead">后台控制 Chromium 与 macOS 窗口，<br>不抢前台，不移动用户的鼠标。</p>
+      <p class="hero-copy">用 Accessibility、CDP 与文本快照理解界面，把动作锁定到正确的进程和窗口，并在每一步之后重新确认结果。</p>
+      <div class="hero-actions">
+        <a class="button button-primary" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载最新版 DMG</a>
+        <a class="button button-quiet" href="#homebrew">Homebrew 安装</a>
+      </div>
+      <p class="hero-footnote">Developer ID 签名与 Apple 公证 · Apache-2.0 开源</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="signal-strip" aria-label="产品状态">
+      <div class="container signal-grid">
+        <p><strong>2</strong><span>Chromium 与 macOS 两个控制面</span></p>
+        <p><strong>0 px</strong><span>定向输入不移动物理鼠标</span></p>
+        <p><strong>Post-check</strong><span>动作后重新观察目标状态</span></p>
+      </div>
+    </section>
+
+    <section class="section install" id="install">
+      <div class="container">
+        <div class="section-heading">
+          <p class="kicker">INSTALL</p>
+          <h2>选择 DMG 或 Homebrew</h2>
+          <p>两种方式安装的是同一份 Developer ID 签名、Apple 公证的 Universal 2 App。系统中已有 DSH 和 Google Chrome 即可。</p>
+        </div>
+        <div class="install-methods">
+          <article class="install-method">
+            <p class="method-label">DIRECT DOWNLOAD</p>
+            <h3>下载 DMG</h3>
+            <p>适合图形界面安装。打开镜像后，将 DSH Computer Use 拖入“应用程序”。</p>
+            <a class="button button-primary" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载最新版 DMG</a>
+            <small data-dmg-name>DSH-Computer-Use-*-universal.dmg</small>
+          </article>
+          <article class="install-method" id="homebrew">
+            <p class="method-label">COMMAND LINE</p>
+            <h3>Homebrew 安装</h3>
+            <p>首次使用先显式添加并信任 Tap；之后可直接通过 Homebrew 升级和卸载。</p>
+            <div class="code-block install-code">
+              <div><span>terminal</span><button class="copy" type="button">复制</button></div>
+              <pre><code>brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
+open -a "DSH Computer Use"</code></pre>
+            </div>
+          </article>
+        </div>
+        <ol class="install-steps">
+          <li>
+            <span class="step-index">01</span>
+            <h3>安装并打开 App</h3>
+            <p>DMG 用户拖入“应用程序”；Homebrew 会自动安装到同一位置。随后打开 App。</p>
+          </li>
+          <li>
+            <span class="step-index">02</span>
+            <h3>确认系统权限</h3>
+            <p>在设置中心授权“辅助功能”和“屏幕录制”。权限只在本机使用。</p>
+          </li>
+          <li>
+            <span class="step-index">03</span>
+            <h3>安装 DSH 插件</h3>
+            <p>点击“安装”。Bundle 自动注册 Host 与工具，无需手改 YAML；随后重启 DSH Host。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section product-band" id="capabilities">
+      <div class="container">
+        <div class="section-heading on-dark">
+          <p class="kicker">CAPABILITIES</p>
+          <h2>观察、锁定、执行、验证</h2>
+          <p>模型收到的是可执行语义，不是要求它猜测截图。UI 与 OCR 文字始终被标记为不可信数据。</p>
+        </div>
+        <div class="execution-flow" aria-label="动作执行链路">
+          <div><span>01</span><strong>Observe</strong><small>读取语义与状态</small></div>
+          <b>→</b>
+          <div><span>02</span><strong>Target</strong><small>锁定 PID 与窗口</small></div>
+          <b>→</b>
+          <div><span>03</span><strong>Act</strong><small>只执行一个动作</small></div>
+          <b>→</b>
+          <div><span>04</span><strong>Verify</strong><small>返回新的观察</small></div>
+        </div>
+        <div class="surface-grid">
+          <article>
+            <p class="surface-label">CHROMIUM</p>
+            <h3>网页是结构，不只是像素</h3>
+            <ul>
+              <li>Playwright 与 CDP Accessibility/DOM</li>
+              <li>稳定 ref、frame、标签页与表单状态</li>
+              <li>导航、点击、输入、选择、拖拽、上传</li>
+            </ul>
+          </article>
+          <article>
+            <p class="surface-label coral">MACOS</p>
+            <h3>后台窗口仍保持可验证</h3>
+            <ul>
+              <li>Accessibility 树优先，Vision OCR 补语义</li>
+              <li>AX、SkyLight、CoreGraphics 分层输入</li>
+              <li>软件光标不接管物理指针</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="architecture">
+      <div class="container architecture-layout">
+        <div class="section-heading sticky-heading">
+          <p class="kicker">ARCHITECTURE</p>
+          <h2>一份签名身份，两个运行模式</h2>
+          <p>Finder 启动显示设置中心；DSH 使用同一个 App 的 <code>--agent</code> 模式启动后台 socket。两个模式共享稳定的 bundle ID 与 TCC 身份。</p>
+          <a class="text-link" href="#architecture">查看当前架构 →</a>
+        </div>
+        <div class="architecture-rows">
+          <article>
+            <span>PRODUCT</span>
+            <h3>DSH Computer Use.app</h3>
+            <p>权限状态、插件安装、诊断与同一签名下的后台 agent。</p>
+          </article>
+          <article>
+            <span>PERCEPTION</span>
+            <h3>AX + CDP + Vision</h3>
+            <p>先取语义，必要时补 OCR；截图是验证材料，不是默认模型上下文。</p>
+          </article>
+          <article>
+            <span>INPUT</span>
+            <h3>目标优先，公开回退</h3>
+            <p>AX 语义动作优先，再走目标进程/窗口输入；无目标时才允许全局 HID。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="boundary-band">
+      <div class="container boundary-grid">
+        <div>
+          <p class="kicker">PLATFORM BOUNDARY</p>
+          <h2>对 macOS 限制保持诚实</h2>
+        </div>
+        <div>
+          <h3>Stage Manager</h3>
+          <p>macOS 26 的架上窗口可能只暴露缩略图。系统会保留 AX 观察并返回明确 warning，不拉伸伪截图，也不进入已知崩溃路径。</p>
+        </div>
+        <div>
+          <h3>SkyLight</h3>
+          <p>后台定向输入使用私有 API，因此完整版本通过 Developer ID 直接分发，不适合 Mac App Store。符号不可用时公开回退或失败关闭。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tools" id="tools">
+      <div class="container">
+        <div class="section-heading">
+          <p class="kicker">MODEL TOOLS</p>
+          <h2>两个工具，闭合一次操作</h2>
+        </div>
+        <div class="tool-grid">
+          <article class="tool-panel">
+            <header><code>computer_observe</code><span>READ</span></header>
+            <p>读取 browser 或 desktop 的文本快照，返回 <code>snapshot_id</code>、稳定 ref、状态和 warning。</p>
+            <dl>
+              <div><dt>detail</dt><dd>interactive · full · changes</dd></div>
+              <div><dt>ocr</dt><dd>auto · always · never</dd></div>
+              <div><dt>query</dt><dd>过滤大型页面或窗口</dd></div>
+            </dl>
+          </article>
+          <article class="tool-panel">
+            <header><code>computer_action</code><span>WRITE</span></header>
+            <p>执行一次明确动作并立即返回动作后语义。过期 ref 会失败关闭，文件上传限制在 Session workspace。</p>
+            <div class="action-list">
+              <code>click</code><code>type</code><code>press</code><code>scroll</code><code>drag</code><code>select</code><code>launch_app</code><code>focus</code>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section developer" id="developer">
+      <div class="container developer-grid">
+        <div class="section-heading">
+          <p class="kicker">DEVELOPER</p>
+          <h2>从源码构建与签名</h2>
+          <p>默认构建 Universal 2；本地迭代可只编译当前架构。公开分发需要 Developer ID Application 和 Apple 公证。</p>
+          <div class="developer-links">
+            <a class="text-link" href="distribution.html">证书、签名与公证 →</a>
+            <a class="text-link" href="#architecture">安全与平台边界 →</a>
+          </div>
+        </div>
+        <div class="code-stack">
+          <div class="code-block">
+            <div><span>build</span><button class="copy" type="button">复制</button></div>
+            <pre><code>pnpm install
+pnpm run typecheck
+pnpm run test
+pnpm run test:native
+pnpm run build</code></pre>
+          </div>
+          <div class="code-block">
+            <div><span>local dmg</span><button class="copy" type="button">复制</button></div>
+            <pre><code>pnpm run package:dmg</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/app-icon.png" width="44" height="44" alt="">
+        <div><strong>DSH Computer Use</strong><span>tech.zrui · Apache-2.0</span></div>
+      </div>
+      <div class="footer-links">
+        <a data-repo-link href="https://github.com/ZRui-C/dsh-computer-use">源码</a>
+        <a data-release-link href="https://github.com/ZRui-C/dsh-computer-use/releases">Releases</a>
+        <a href="distribution.html">证书安装</a>
+        <a href="#top">回到顶部</a>
+      </div>
+      <p>不受 Apple 背书。“DeepSeek”等名称仅用于说明与 DeepSeek Harness/DSH 的兼容关系。</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
