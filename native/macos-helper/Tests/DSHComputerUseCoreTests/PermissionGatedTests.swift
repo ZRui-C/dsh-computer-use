@@ -3,7 +3,7 @@ import DSHComputerUseCore
 
 /// Permission-dependent tests. These never prompt: `AXIsProcessTrusted()` and
 /// `CGPreflightScreenCaptureAccess()` only read the current TCC state. Live
-/// desktop observation is skipped when Accessibility is not granted.
+/// desktop observation is skipped in headless CI or when Accessibility is not granted.
 final class PermissionGatedTests: XCTestCase {
     func testAccessibilityStatusIsBoolean() {
         let value = Permissions.accessibilityGranted
@@ -17,6 +17,10 @@ final class PermissionGatedTests: XCTestCase {
     }
 
     func testDesktopObservationSkipsWithoutAccessibility() throws {
+        try XCTSkipIf(
+            ProcessInfo.processInfo.environment["CI"] != nil,
+            "Headless CI has no Aqua session for live AX observation"
+        )
         try XCTSkipUnless(
             Permissions.accessibilityGranted,
             "Accessibility permission not granted; skipping live AX observation"
