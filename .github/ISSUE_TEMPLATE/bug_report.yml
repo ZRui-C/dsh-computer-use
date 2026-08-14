@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible browser, desktop, installer, or packaging defect
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include API keys, credentials, private screenshots, or unrelated logs.
+  - type: input
+    id: version
+    attributes:
+      label: DSH Computer Use version
+      placeholder: 0.3.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and hardware
+      placeholder: macOS 15.4, Apple M2
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Installer, Permissions, Browser, macOS desktop, Stage Manager, DSH integration, Packaging]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the target app and whether it was foreground, covered, or on the Stage Manager shelf.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and redacted diagnostics
+    validations:
+      required: true

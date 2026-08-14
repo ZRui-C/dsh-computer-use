@@ -1,0 +1,79 @@
+{
+  "name": "dsh-computer-use",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Text-first browser and background macOS computer use for DSH",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZRui-C/dsh-computer-use.git"
+  },
+  "homepage": "https://computer-use.zrui.tech/",
+  "bugs": {
+    "url": "https://github.com/ZRui-C/dsh-computer-use/issues"
+  },
+  "type": "module",
+  "exports": {
+    "./host": {
+      "types": "./dist/host.d.ts",
+      "default": "./dist/host.js"
+    },
+    "./tool": {
+      "types": "./dist/tool.d.ts",
+      "default": "./dist/tool.js"
+    }
+  },
+  "files": [
+    "dist",
+    "cordis.patch.yml",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "README.md",
+    "README.zh.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "pnpm run build:ts && pnpm run build:native",
+    "build:ts": "tsc -p tsconfig.build.json",
+    "build:native": "node scripts/build-native.mjs",
+    "package:dmg": "node scripts/package-release.mjs --skip-notarize",
+    "release:macos": "node scripts/package-release.mjs",
+    "smoke:native": "node scripts/smoke-native.mjs",
+    "check:pages": "node scripts/check-pages.mjs",
+    "visual:pages": "node scripts/visual-check-pages.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:browser": "vitest run tests/browser",
+    "test:native": "swift test --package-path native/macos-helper",
+    "check": "pnpm run check:pages && pnpm run typecheck && pnpm run test && pnpm run build"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-subprocess": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-subprocess": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

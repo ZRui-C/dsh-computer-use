@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>DSHComputerUse</string>
+	<key>CFBundleDisplayName</key>
+	<string>DSH Computer Use</string>
+	<key>CFBundleIdentifier</key>
+	<string>tech.zrui.dsh-computer-use</string>
+	<key>CFBundleVersion</key>
+	<string>0.3.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.3.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleExecutable</key>
+	<string>DSHComputerUse</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>DSH Computer Use captures selected windows for OCR and action verification.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2026 zrui. Licensed under Apache-2.0.</string>
+</dict>
+</plist>

@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check:pages
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run test:native
+      - name: Build Universal app
+        run: pnpm run build
+      - name: Verify architectures and signature
+        run: |
+          lipo -archs 'native/macos-helper/dist/DSH Computer Use.app/Contents/MacOS/DSHComputerUse'
+          codesign --verify --deep --strict 'native/macos-helper/dist/DSH Computer Use.app'

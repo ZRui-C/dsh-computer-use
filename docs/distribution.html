@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>安装 Developer ID 证书 · DSH Computer Use</title>
+  <meta name="description" content="为 DSH Computer Use 安装 Developer ID Application 证书并配置 Apple 公证与 GitHub Actions。">
+  <meta name="theme-color" content="#f7f8f8">
+  <link rel="canonical" href="https://computer-use.zrui.tech/distribution.html">
+  <link rel="icon" type="image/png" href="assets/app-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="doc-page">
+  <nav class="nav scrolled" aria-label="文档导航">
+    <div class="nav-inner">
+      <a class="brand" href="index.html" aria-label="返回 DSH Computer Use 首页">
+        <img src="assets/app-icon.png" width="34" height="34" alt="">
+        <span>DSH Computer Use</span>
+        <small>证书与公证</small>
+      </a>
+      <div class="nav-actions doc-nav-actions">
+        <a class="button button-quiet compact" href="index.html">产品首页</a>
+        <a class="button button-primary compact" href="https://developer.apple.com/account/resources/certificates/add">Apple Developer</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="doc-header">
+    <div class="container">
+      <p class="eyebrow"><span></span> RELEASE SETUP</p>
+      <h1>安装 Developer ID 证书</h1>
+      <p>用 Developer ID Application 签名、公证并直接分发 macOS App。证书必须与本机私钥配对；只有 `.cer` 文件不能完成签名。</p>
+      <div class="doc-meta">
+        <span>需要 Apple Developer Program</span>
+        <span>适用于 macOS 14+</span>
+        <span>不涉及 Mac App Store</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="doc-main">
+    <div class="container doc-layout">
+      <aside class="doc-toc" aria-label="本页目录">
+        <strong>本页目录</strong>
+        <a href="#xcode">Xcode 安装</a>
+        <a href="#website">网站与 CSR</a>
+        <a href="#verify">验证身份</a>
+        <a href="#notary">本机公证</a>
+        <a href="#ci">GitHub Actions</a>
+        <a href="#troubleshooting">问题排查</a>
+      </aside>
+
+      <article class="doc-content">
+        <section class="doc-intro">
+          <p class="kicker">BEFORE YOU START</p>
+          <h2>确认 Team 权限</h2>
+          <p>需要使用准备发布 App 的 Apple Developer Program Team。Account Holder 或 Admin 可以创建证书；其他角色需要 Team 开启 <strong>Access to Certificates, Identifiers &amp; Profiles</strong>。</p>
+        </section>
+
+        <section id="xcode">
+          <p class="kicker">RECOMMENDED</p>
+          <h2>通过 Xcode 安装</h2>
+          <ol class="doc-steps">
+            <li><strong>打开 Accounts</strong><span>进入 <b>Xcode &gt; Settings &gt; Accounts</b>，添加已加入开发者 Team 的 Apple ID。</span></li>
+            <li><strong>选择 Team</strong><span>选中对应 Team，然后打开 <b>Manage Certificates</b>。</span></li>
+            <li><strong>创建证书</strong><span>点击左下角 `+`，选择 <b>Developer ID Application</b>。</span></li>
+            <li><strong>确认私钥</strong><span>Xcode 会在“登录”钥匙串中生成私钥并安装匹配的公开证书。</span></li>
+          </ol>
+          <p class="doc-note">推荐这条路径，因为证书与私钥会在同一台 Mac 上自动正确配对。</p>
+        </section>
+
+        <section id="website">
+          <p class="kicker">MANUAL CSR</p>
+          <h2>通过 Apple Developer 网站安装</h2>
+          <p>Xcode 无法创建时，使用“钥匙串访问”手工生成 CSR：</p>
+          <ol class="doc-steps compact-steps">
+            <li><strong>生成 CSR</strong><span>打开“钥匙串访问”，选择 <b>证书助理 &gt; 从证书颁发机构请求证书</b>。填写 Apple ID 邮箱和常用名称，选择“存储到磁盘”。</span></li>
+            <li><strong>创建证书</strong><span>打开 <a href="https://developer.apple.com/account/resources/certificates/add">Certificates, Identifiers &amp; Profiles</a>，选择 <b>Developer ID Application</b> 并上传 CSR。</span></li>
+            <li><strong>导入证书</strong><span>下载 `.cer`，双击导入“登录”钥匙串。</span></li>
+            <li><strong>展开检查</strong><span>在“钥匙串访问 &gt; 我的证书”中展开证书，下面必须显示一把私钥。</span></li>
+          </ol>
+          <div class="doc-warning"><strong>不要只备份 `.cer`</strong><p>`.cer` 不含私钥。若证书下面没有私钥，CSR 很可能在另一台 Mac 上生成，或本机私钥已经丢失。此时应重新创建 CSR 和证书。</p></div>
+        </section>
+
+        <section id="verify">
+          <p class="kicker">VERIFY</p>
+          <h2>在终端确认签名身份</h2>
+          <div class="code-block doc-code">
+            <div><span>identity</span><button class="copy" type="button">复制</button></div>
+            <pre><code>security find-identity -v -p codesigning</code></pre>
+          </div>
+          <p>输出中必须出现有效的：</p>
+          <pre class="result-line"><code>Developer ID Application: 名称 (TEAMID)</code></pre>
+          <p>项目构建时，把这一整行传入 `COMPUTER_USE_CODESIGN_IDENTITY`。</p>
+        </section>
+
+        <section id="notary">
+          <p class="kicker">NOTARIZATION</p>
+          <h2>配置本机公证凭据</h2>
+          <p>在 <a href="https://appleid.apple.com/">appleid.apple.com</a> 创建 App 专用密码，然后交给 `notarytool` 存入钥匙串：</p>
+          <div class="code-block doc-code">
+            <div><span>notary profile</span><button class="copy" type="button">复制</button></div>
+            <pre><code>xcrun notarytool store-credentials dsh-computer-use-notary \
+  --apple-id 'release@example.com' \
+  --team-id 'TEAMID' \
+  --password 'app-specific-password'</code></pre>
+          </div>
+          <p>构建并生成正式 DMG：</p>
+          <div class="code-block doc-code">
+            <div><span>release</span><button class="copy" type="button">复制</button></div>
+            <pre><code>COMPUTER_USE_CODESIGN_IDENTITY='Developer ID Application: 名称 (TEAMID)' \
+  pnpm run build
+
+COMPUTER_USE_CODESIGN_IDENTITY='Developer ID Application: 名称 (TEAMID)' \
+NOTARYTOOL_PROFILE='dsh-computer-use-notary' \
+  pnpm run release:macos</code></pre>
+          </div>
+        </section>
+
+        <section id="ci">
+          <p class="kicker">GITHUB ACTIONS</p>
+          <h2>导出 P12 与 API Key</h2>
+          <p>在“钥匙串访问 &gt; 我的证书”中右键 Developer ID 证书，导出为带强密码的 `.p12`。然后编码到剪贴板：</p>
+          <div class="code-block doc-code">
+            <div><span>p12</span><button class="copy" type="button">复制</button></div>
+            <pre><code>base64 -i DeveloperIDApplication.p12 | pbcopy</code></pre>
+          </div>
+          <p>在 <b>App Store Connect &gt; Users and Access &gt; Integrations &gt; App Store Connect API</b> 创建 Team API Key，记录 Issuer ID 与 Key ID，并保存只能下载一次的 `.p8`。</p>
+          <div class="secret-table" role="table" aria-label="GitHub Actions Secrets">
+            <div role="row"><code>MACOS_CERTIFICATE_P12</code><span>Base64 编码的证书和私钥</span></div>
+            <div role="row"><code>MACOS_CERTIFICATE_PASSWORD</code><span>P12 导出密码</span></div>
+            <div role="row"><code>MACOS_KEYCHAIN_PASSWORD</code><span>CI 临时钥匙串密码</span></div>
+            <div role="row"><code>MACOS_CODESIGN_IDENTITY</code><span>完整 Developer ID 身份</span></div>
+            <div role="row"><code>APPLE_API_KEY_ID</code><span>App Store Connect Key ID</span></div>
+            <div role="row"><code>APPLE_API_ISSUER_ID</code><span>App Store Connect Issuer ID</span></div>
+            <div role="row"><code>APPLE_API_KEY_P8</code><span>P8 文件完整内容</span></div>
+          </div>
+        </section>
+
+        <section id="troubleshooting">
+          <p class="kicker">TROUBLESHOOTING</p>
+          <h2>常见问题</h2>
+          <dl class="doc-faq">
+            <div><dt>只有 Apple Development，没有 Developer ID Application</dt><dd>Apple Development 只适合本机开发验证。回到 Xcode Manage Certificates，使用已加入付费 Team 的账号创建 Developer ID Application。</dd></div>
+            <div><dt>证书存在，但 codesign 找不到 identity</dt><dd>在“我的证书”中确认它可以展开并显示私钥。没有私钥时不能签名。</dd></div>
+            <div><dt>证书显示不受信任</dt><dd>先更新 macOS/Xcode。仍有问题时，从 Apple PKI 页面安装最新 Developer ID 中间证书，并检查系统日期和钥匙串信任设置。</dd></div>
+            <div><dt>公证失败但签名通过</dt><dd>确认 Team ID、App 专用密码或 App Store Connect API Key 属于同一发布 Team，并读取 notarytool 返回的 submission log。</dd></div>
+          </dl>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/app-icon.png" width="44" height="44" alt="">
+        <div><strong>DSH Computer Use</strong><span>tech.zrui · Apache-2.0</span></div>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">产品首页</a>
+        <a href="https://github.com/ZRui-C/dsh-computer-use">GitHub</a>
+        <a href="#xcode">回到步骤</a>
+      </div>
+      <p>证书、P12、私钥和公证凭据不得提交到仓库、日志、Issue 或 Release 附件。</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

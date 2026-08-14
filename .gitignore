@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+native/macos-helper/.build/
+native/macos-helper/dist/
+playwright-report/
+test-results/
+release/
+*.dmg
+*.p12
+*.p8
+.env
+.env.*
+!.env.example

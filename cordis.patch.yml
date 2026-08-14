@@ -1,0 +1,10 @@
+# DSH Computer Use is a deployment capability: one native runtime serves every
+# session, while the tool registrations remain scoped by DSH's tool registry.
+- insert:
+    - id: computer-use-host
+      name: 'dsh-computer-use/host'
+      config:
+        stateDir: !!js dshHomePath('computer-use')
+
+    - id: computer-use-tool
+      name: 'dsh-computer-use/tool'
