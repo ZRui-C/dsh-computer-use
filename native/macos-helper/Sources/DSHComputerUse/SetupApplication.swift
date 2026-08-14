@@ -65,7 +65,8 @@ private final class SetupModel: ObservableObject {
     init() {
         refresh()
         timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.refreshPermissions() }
+            guard let model = self else { return }
+            Task { @MainActor in model.refreshPermissions() }
         }
     }
 
