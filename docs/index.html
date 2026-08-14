@@ -40,7 +40,7 @@
       </div>
       <div class="nav-actions">
         <a class="button button-quiet compact" data-repo-link href="https://github.com/ZRui-C/dsh-computer-use">源码</a>
-        <a class="button button-primary compact" data-release-link href="https://github.com/ZRui-C/dsh-computer-use/releases">版本</a>
+        <a class="button button-primary compact" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载</a>
         <button class="nav-toggle" id="navToggle" type="button" aria-label="打开菜单" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -55,8 +55,8 @@
       <p class="hero-lead">后台控制 Chromium 与 macOS 窗口，<br>不抢前台，不移动用户的鼠标。</p>
       <p class="hero-copy">用 Accessibility、CDP 与文本快照理解界面，把动作锁定到正确的进程和窗口，并在每一步之后重新确认结果。</p>
       <div class="hero-actions">
-        <a class="button button-primary" data-release-link href="https://github.com/ZRui-C/dsh-computer-use/releases">版本与构建</a>
-        <a class="button button-quiet" href="#install">查看安装步骤</a>
+        <a class="button button-primary" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载最新版 DMG</a>
+        <a class="button button-quiet" href="#homebrew">Homebrew 安装</a>
       </div>
       <p class="hero-footnote">Developer ID 签名与 Apple 公证 · Apache-2.0 开源</p>
     </div>
@@ -75,14 +75,35 @@
       <div class="container">
         <div class="section-heading">
           <p class="kicker">INSTALL</p>
-          <h2>拖入应用程序，然后授权</h2>
-          <p>普通用户不需要 Xcode、Swift 或源码目录。系统中已有 DSH 和 Google Chrome 即可。</p>
+          <h2>选择 DMG 或 Homebrew</h2>
+          <p>两种方式安装的是同一份 Developer ID 签名、Apple 公证的 Universal 2 App。系统中已有 DSH 和 Google Chrome 即可。</p>
+        </div>
+        <div class="install-methods">
+          <article class="install-method">
+            <p class="method-label">DIRECT DOWNLOAD</p>
+            <h3>下载 DMG</h3>
+            <p>适合图形界面安装。打开镜像后，将 DSH Computer Use 拖入“应用程序”。</p>
+            <a class="button button-primary" data-dmg-link href="https://github.com/ZRui-C/dsh-computer-use/releases/latest">下载最新版 DMG</a>
+            <small data-dmg-name>DSH-Computer-Use-*-universal.dmg</small>
+          </article>
+          <article class="install-method" id="homebrew">
+            <p class="method-label">COMMAND LINE</p>
+            <h3>Homebrew 安装</h3>
+            <p>首次使用先显式添加并信任 Tap；之后可直接通过 Homebrew 升级和卸载。</p>
+            <div class="code-block install-code">
+              <div><span>terminal</span><button class="copy" type="button">复制</button></div>
+              <pre><code>brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
+open -a "DSH Computer Use"</code></pre>
+            </div>
+          </article>
         </div>
         <ol class="install-steps">
           <li>
             <span class="step-index">01</span>
-            <h3>安装 App</h3>
-            <p>打开 Universal 2 DMG，将 DSH Computer Use 拖入“应用程序”。</p>
+            <h3>安装并打开 App</h3>
+            <p>DMG 用户拖入“应用程序”；Homebrew 会自动安装到同一位置。随后打开 App。</p>
           </li>
           <li>
             <span class="step-index">02</span>
@@ -95,10 +116,6 @@
             <p>点击“安装”。Bundle 自动注册 Host 与工具，无需手改 YAML；随后重启 DSH Host。</p>
           </li>
         </ol>
-        <div class="install-actions">
-          <a class="button button-primary" data-release-link href="https://github.com/ZRui-C/dsh-computer-use/releases">打开 Releases</a>
-          <span>下载文件：<code>DSH-Computer-Use-*-universal.dmg</code></span>
-        </div>
       </div>
     </section>
 

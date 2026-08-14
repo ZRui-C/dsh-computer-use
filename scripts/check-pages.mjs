@@ -22,6 +22,10 @@ const requiredText = [
   'computer_observe',
   'computer_action',
   'https://github.com/ZRui-C/dsh-computer-use',
+  'brew tap zrui-c/tap',
+  'brew trust zrui-c/tap',
+  'brew install --cask dsh-computer-use',
+  'data-dmg-link',
 ];
 for (const text of requiredText) {
   if (!html.includes(text) && !javascript.includes(text)) {

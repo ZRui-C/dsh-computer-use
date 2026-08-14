@@ -104,6 +104,7 @@ The tagged release workflow expects:
 | `APPLE_API_KEY_ID` | App Store Connect API key ID |
 | `APPLE_API_ISSUER_ID` | App Store Connect issuer ID |
 | `APPLE_API_KEY_P8` | P8 private key contents |
+| `HOMEBREW_TAP_DEPLOY_KEY` | SSH deploy key with write access only to `ZRui-C/homebrew-tap` |
 
 Never place these values in repository variables, source files, workflow logs, issue reports, or release assets.
 
@@ -111,19 +112,16 @@ Never place these values in repository variables, source files, workflow logs, i
 
 Replacing the App in `/Applications` preserves the bundle ID and designated requirement. A release signed by the same Team ID normally retains TCC grants. Open the setup center after upgrading and select **Reinstall** to refresh the DSH file dependency, then restart the running DSH Host.
 
-## Publishing the plugin bundle to npm
+## Homebrew Cask
 
-The TypeScript bundle can be installed without a DMG when the app is already present in `/Applications` (the runtime falls back to `/Applications/DSH Computer Use.app`):
-
-```bash
-npm login
-npm publish
-```
-
-`prepare` rebuilds `dist/` from TypeScript before packing, so the tarball always ships current build output. The package name `dsh-computer-use` is registered on the public registry. Users then install it with:
+The public Cask lives in [`ZRui-C/homebrew-tap`](https://github.com/ZRui-C/homebrew-tap) and installs the same signed, notarized DMG published in GitHub Releases:
 
 ```bash
-dsh plugin --profile web add dsh-computer-use
+brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
 ```
 
-The native helper is **not** part of the npm package; it is resolved from the installed app in `/Applications`. Distribute the DMG as the primary install path and use npm as the convenience path for the bundle layer.
+After a tagged release publishes its DMG and checksum, the release workflow reads the generated SHA-256, updates `Casks/dsh-computer-use.rb`, and pushes the change with the dedicated `HOMEBREW_TAP_DEPLOY_KEY`. This deploy key has write access only to the Tap repository.
+
+Do not publish the native helper through npm or use an npm lifecycle script to copy an App into `/Applications`. The DMG remains the canonical release artifact; Homebrew is an installation and upgrade frontend for that artifact.

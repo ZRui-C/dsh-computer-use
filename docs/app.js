@@ -3,15 +3,40 @@
   'use strict';
 
   var repository = 'https://github.com/ZRui-C/dsh-computer-use';
+  var latestRelease = repository + '/releases/latest';
 
   document.querySelectorAll('[data-repo-link]').forEach(function (link) {
     link.href = repository;
   });
   document.querySelectorAll('[data-release-link]').forEach(function (link) {
-    link.href = repository + '/releases';
+    link.href = latestRelease;
+  });
+  document.querySelectorAll('[data-dmg-link]').forEach(function (link) {
+    link.href = latestRelease;
   });
   document.querySelectorAll('[data-repo-path]').forEach(function (link) {
     link.href = repository + '/blob/main/' + link.getAttribute('data-repo-path');
+  });
+
+  fetch('https://api.github.com/repos/ZRui-C/dsh-computer-use/releases/latest', {
+    headers: { Accept: 'application/vnd.github+json' }
+  }).then(function (response) {
+    if (!response.ok) throw new Error('latest release request failed');
+    return response.json();
+  }).then(function (release) {
+    var assets = Array.isArray(release.assets) ? release.assets : [];
+    var dmg = assets.find(function (asset) {
+      return /^DSH-Computer-Use-.+-universal\.dmg$/.test(asset.name || '');
+    });
+    if (!dmg || !dmg.browser_download_url) return;
+    document.querySelectorAll('[data-dmg-link]').forEach(function (link) {
+      link.href = dmg.browser_download_url;
+    });
+    document.querySelectorAll('[data-dmg-name]').forEach(function (label) {
+      label.textContent = dmg.name;
+    });
+  }).catch(function () {
+    // The static latest-release link remains usable when the API is unavailable.
   });
 
   document.querySelectorAll('.copy').forEach(function (button) {

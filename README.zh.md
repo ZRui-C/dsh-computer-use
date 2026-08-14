@@ -26,12 +26,23 @@
 
 ## 安装
 
+### Homebrew
+
+```bash
+brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
+open -a "DSH Computer Use"
+```
+
+### DMG
+
 1. 从 [Releases](https://github.com/ZRui-C/dsh-computer-use/releases/latest) 下载最新版 `DSH-Computer-Use-*-universal.dmg`。
 2. 将 **DSH Computer Use** 拖入“应用程序”并打开。
-3. 按设置中心引导授权“辅助功能”和“屏幕录制”。
-4. 在“DSH 插件”一行点击“安装”，然后重启正在运行的 DSH Host。
 
-官方 DMG 是 Universal 2，经过 Developer ID 签名、Apple 公证，并附带 SHA-256 校验和。普通用户不需要安装 Xcode、Swift，也不需要下载源码；系统中需要已有 DSH 和 Google Chrome。
+两种方式都需要按设置中心引导授权“辅助功能”和“屏幕录制”，在“DSH 插件”一行点击“安装”，然后重启正在运行的 DSH Host。
+
+Homebrew Cask 与官方 DMG 安装的是同一份 Universal 2 App，均经过 Developer ID 签名和 Apple 公证。普通用户不需要安装 Xcode、Swift，也不需要下载源码；系统中需要已有 DSH 和 Google Chrome。
 
 <p align="center">
   <img src="docs/assets/setup-center.png" width="760" alt="DSH Computer Use 设置中心">

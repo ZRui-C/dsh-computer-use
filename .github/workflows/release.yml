@@ -61,4 +61,39 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/*.dmg release/*.sha256 --generate-notes --verify-tag
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release/*.dmg release/*.sha256 --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" release/*.dmg release/*.sha256 --generate-notes --verify-tag
+          fi
+
+      - name: Update Homebrew Cask
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HOMEBREW_TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          test -n "$HOMEBREW_TAP_DEPLOY_KEY"
+          KEY_PATH="$RUNNER_TEMP/homebrew-tap-deploy-key"
+          KNOWN_HOSTS="$RUNNER_TEMP/github-known-hosts"
+          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
+          printf '%s\n' "$HOMEBREW_TAP_DEPLOY_KEY" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$KNOWN_HOSTS"
+          export GIT_SSH_COMMAND="ssh -i $KEY_PATH -o IdentitiesOnly=yes -o UserKnownHostsFile=$KNOWN_HOSTS"
+          git clone git@github.com:ZRui-C/homebrew-tap.git "$TAP_DIR"
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          CHECKSUM_FILE="release/DSH-Computer-Use-${VERSION}-universal.dmg.sha256"
+          SHA256="$(awk '{print $1}' "$CHECKSUM_FILE")"
+          node scripts/update-homebrew-cask.mjs "$TAP_DIR/Casks/dsh-computer-use.rb" "$VERSION" "$SHA256"
+
+          git -C "$TAP_DIR" config user.name "github-actions[bot]"
+          git -C "$TAP_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$TAP_DIR" add Casks/dsh-computer-use.rb
+          if git -C "$TAP_DIR" diff --cached --quiet; then
+            echo "Homebrew Cask is already current."
+            exit 0
+          fi
+          git -C "$TAP_DIR" commit -m "dsh-computer-use ${VERSION}"
+          git -C "$TAP_DIR" push origin main

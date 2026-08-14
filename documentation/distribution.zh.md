@@ -125,6 +125,7 @@ Release workflow 需要：
 | `APPLE_API_KEY_ID` | App Store Connect API Key ID |
 | `APPLE_API_ISSUER_ID` | App Store Connect Issuer ID |
 | `APPLE_API_KEY_P8` | P8 私钥文件内容 |
+| `HOMEBREW_TAP_DEPLOY_KEY` | 仅对 `ZRui-C/homebrew-tap` 有写权限的 SSH deploy key |
 
 这些值只能放在 GitHub Actions Secrets，不应出现在仓库变量、源码、日志、Issue 或 Release 附件中。
 
@@ -132,19 +133,16 @@ Release workflow 需要：
 
 用新版本替换 `/Applications` 中的 App，会保留 bundle ID 和 designated requirement。同一 Team ID 签发的升级通常能延续现有 TCC 授权。升级后打开设置中心点击“重新安装”以刷新 DSH file dependency，然后重启 DSH Host。
 
-## 发布插件包到 npm
+## Homebrew Cask
 
-当 App 已安装在 `/Applications` 时（运行时回退到 `/Applications/DSH Computer Use.app`），TS 插件包可以脱离 DMG 单独安装：
-
-```bash
-npm login
-npm publish
-```
-
-`prepare` 会在打包前从 TypeScript 重新构建 `dist/`，因此 tarball 始终包含最新构建产物。`dsh-computer-use` 这个包名已预留，发布后用户可这样安装：
+公开 Cask 位于 [`ZRui-C/homebrew-tap`](https://github.com/ZRui-C/homebrew-tap)，安装的仍然是 GitHub Releases 中同一份已签名、公证的 DMG：
 
 ```bash
-dsh plugin --profile web add dsh-computer-use
+brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
 ```
 
-原生 helper **不在** npm 包内，运行时从 `/Applications` 中的 App 解析。请以 DMG 作为主要安装路径，npm 作为 bundle 层的便捷路径。
+Tag release 发布 DMG 和校验和后，release workflow 会读取刚生成的 SHA-256，更新 `Casks/dsh-computer-use.rb`，再使用专用的 `HOMEBREW_TAP_DEPLOY_KEY` 推送。该 deploy key 只对 Tap 仓库有写权限。
+
+不要通过 npm 分发原生 helper，也不要用 npm lifecycle script 将 App 复制到 `/Applications`。DMG 仍是唯一标准 release 产物；Homebrew 只是它的安装与升级入口。

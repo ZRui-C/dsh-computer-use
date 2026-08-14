@@ -26,12 +26,23 @@
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap zrui-c/tap
+brew trust zrui-c/tap
+brew install --cask dsh-computer-use
+open -a "DSH Computer Use"
+```
+
+### DMG
+
 1. Download the latest `DSH-Computer-Use-*-universal.dmg` from [Releases](https://github.com/ZRui-C/dsh-computer-use/releases/latest).
 2. Drag **DSH Computer Use** into **Applications** and open it.
-3. Authorize **Accessibility** and **Screen Recording** when the setup center asks.
-4. Select **Install** under **DSH Plugin**, then restart the running DSH Host.
 
-The official DMG is Universal 2, Developer ID signed, Apple-notarized, and published with a SHA-256 checksum. Users do not need Xcode, Swift, or this source checkout. DSH and Google Chrome must already be installed.
+With either method, authorize **Accessibility** and **Screen Recording**, select **Install** under **DSH Plugin**, then restart the running DSH Host.
+
+The Homebrew Cask and official DMG install the same Universal 2, Developer ID signed, Apple-notarized app. Users do not need Xcode, Swift, or this source checkout. DSH and Google Chrome must already be installed.
 
 <p align="center">
   <img src="docs/assets/setup-center.png" width="760" alt="DSH Computer Use setup center">

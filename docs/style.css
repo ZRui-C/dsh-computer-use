@@ -360,8 +360,70 @@ code {
   background: var(--surface);
 }
 
-.install-steps {
+.install-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.install-method {
+  min-width: 0;
+  padding: 34px 44px 38px 0;
+  scroll-margin-top: calc(var(--nav-height) + 20px);
+}
+
+.install-method + .install-method {
+  padding-right: 0;
+  padding-left: 44px;
+  border-left: 1px solid var(--line);
+}
+
+.method-label {
+  margin: 0 0 15px;
+  color: var(--coral);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.install-method h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.install-method > p:not(.method-label) {
+  max-width: 470px;
   margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.install-method > .button {
+  margin-top: 27px;
+}
+
+.install-method > small {
+  margin-top: 12px;
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.install-method .install-code {
+  max-width: 500px;
+  margin-top: 24px;
+}
+
+.install-method .install-code pre {
+  padding: 16px 18px;
+  font-size: 13px;
+}
+
+.install-steps {
+  margin: 54px 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -401,20 +463,6 @@ code {
   margin: 0;
   color: var(--muted);
   font-size: 15px;
-}
-
-.install-actions {
-  margin-top: 32px;
-  padding-top: 26px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  border-top: 1px solid var(--line);
-}
-
-.install-actions span {
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .product-band {
@@ -1160,6 +1208,7 @@ code {
   }
 
   .signal-grid,
+  .install-methods,
   .install-steps,
   .surface-grid,
   .tool-grid,
@@ -1189,6 +1238,21 @@ code {
     font-size: 32px;
   }
 
+  .install-method,
+  .install-method + .install-method {
+    padding: 28px 0 32px;
+    border-left: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .install-method:last-child {
+    border-bottom: none;
+  }
+
+  .install-steps {
+    margin-top: 38px;
+  }
+
   .install-steps li,
   .install-steps li:not(:first-child),
   .install-steps li:last-child {
@@ -1200,11 +1264,6 @@ code {
 
   .install-steps h3 {
     margin-top: 16px;
-  }
-
-  .install-actions {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
   .execution-flow {
