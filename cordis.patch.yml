@@ -1,5 +1,6 @@
 # DSH Computer Use is a deployment capability: one native runtime serves every
-# session, while the tool registrations remain scoped by DSH's tool registry.
+# session. This host-plane tool row registers into the global tool layer, so
+# every agent preset inherits it through agent -> preset -> global resolution.
 - insert:
     - id: computer-use-host
       name: 'dsh-computer-use/host'

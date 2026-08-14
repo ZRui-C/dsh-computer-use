@@ -69,7 +69,7 @@ App 内嵌包已在 `package.json` 声明 DSH bundle。设置中心执行的官�
 dsh plugin --profile web add --save-exact file:/path/to/DSH\ Computer\ Use.app/Contents/Resources/Plugin
 ```
 
-`cordis.patch.yml` 会同时安装 Host runtime 和模型可见的 `computer_observe` / `computer_action`。不再要求用户手改 profile YAML，也不会覆盖随附或用户 preset。安装或升级后需要重启正在运行的 DSH Host。
+`cordis.patch.yml` 会安装 Host runtime，并将 `computer_observe` / `computer_action` 注册到 DSH 的 global tool layer，由所有 agent preset 继承。不要求用户手改 profile YAML 或复制 preset。设置中心会识别旧版“只有 dependency、没有启用 bundle”的状态并提供修复。安装、修复或升级后需要重启正在运行的 DSH Host。
 
 ## 从源码构建
 

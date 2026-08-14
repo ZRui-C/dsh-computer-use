@@ -4,6 +4,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- Register the Computer Use tools in the global DSH tool layer so every agent preset inherits them.
+- Detect and repair profiles where the package dependency exists but `dsh.profile.bundles` does not enable it.
+
 ## [0.3.0] - 2026-08-14
 
 ### Added

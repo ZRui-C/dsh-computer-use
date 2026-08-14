@@ -33,6 +33,22 @@ describe('DSH tool plugin', () => {
     expect(schemas[0]?.parameters).toMatchObject({ type: 'object' })
   })
 
+  it('keeps both tools visible through every agent preset scope', () => {
+    const context = new Context()
+    new SystemPrompt(context, {})
+    new ToolRuntime(context)
+    new FakeComputerUse(context)
+    apply(context)
+
+    const presetKeys = ['standard', 'code', 'cordis', 'minimal'].map((id) => ({ id }))
+    for (const presetKey of presetKeys) {
+      expect(context.tools.schemas(presetKey).map((schema) => schema.name)).toEqual([
+        'computer_observe',
+        'computer_action',
+      ])
+    }
+  })
+
   it('adds non-complete prompt guidance in the tool range', async () => {
     const context = new Context()
     new SystemPrompt(context, {})

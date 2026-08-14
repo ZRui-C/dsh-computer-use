@@ -56,6 +56,7 @@ private final class SetupModel: ObservableObject {
     @Published var screenCaptureGranted = false
     @Published var dshExecutable: String?
     @Published var pluginInstalled = false
+    @Published var pluginNeedsRepair = false
     @Published var isInstalling = false
     @Published var message: String?
     @Published var restartRequired = false
@@ -81,6 +82,7 @@ private final class SetupModel: ObservableObject {
         let state = ProductInstaller.inspect()
         dshExecutable = state.dshExecutable
         pluginInstalled = state.pluginInstalled
+        pluginNeedsRepair = state.pluginNeedsRepair
     }
 
     func requestAccessibility() {
@@ -183,7 +185,9 @@ private struct SetupView: View {
                     complete: model.pluginInstalled,
                     actionTitle: model.dshExecutable == nil
                         ? Copy.choose
-                        : (model.pluginInstalled ? Copy.reinstall : Copy.install),
+                        : (model.pluginInstalled
+                            ? Copy.reinstall
+                            : (model.pluginNeedsRepair ? Copy.repair : Copy.install)),
                     busy: model.isInstalling,
                     action: model.configurePlugin
                 )
@@ -239,6 +243,7 @@ private struct SetupView: View {
 
     private var dshDetail: String {
         if model.pluginInstalled { return Copy.dshInstalled }
+        if model.pluginNeedsRepair { return Copy.dshNeedsRepair }
         if let path = model.dshExecutable {
             return Copy.dshFound.replacingOccurrences(of: "%@", with: path)
         }
@@ -330,10 +335,12 @@ private enum Copy {
     static let captureDetail = chinese ? "捕获窗口像素，用于 OCR 与动作后验证。" : "Captures window pixels for OCR and post-action verification."
     static let dshTitle = chinese ? "DSH 插件" : "DSH Plugin"
     static let dshMissing = chinese ? "未找到 dsh 命令。请先安装 DeepSeek Harness。" : "The dsh command was not found. Install DeepSeek Harness first."
-    static let dshInstalled = chinese ? "插件已安装到 Web profile。" : "The plugin is installed in the Web profile."
+    static let dshInstalled = chinese ? "插件已全局启用，所有 agent preset 均可使用。" : "The plugin is globally enabled for every agent preset."
+    static let dshNeedsRepair = chinese ? "依赖已存在，但尚未启用全局 bundle；点击“修复”。" : "The dependency exists but its global bundle is disabled. Select Repair."
     static let dshFound = chinese ? "已找到 %@，可以安装插件。" : "Found %@ and ready to install."
     static let authorize = chinese ? "授权" : "Authorize"
     static let install = chinese ? "安装" : "Install"
+    static let repair = chinese ? "修复" : "Repair"
     static let reinstall = chinese ? "重新安装" : "Reinstall"
     static let choose = chinese ? "选择…" : "Choose…"
     static let chooseDSH = chinese ? "选择 dsh 可执行文件" : "Choose the dsh executable"

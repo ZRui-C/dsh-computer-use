@@ -69,7 +69,7 @@ The embedded package declares a DSH bundle in `package.json`. The setup center r
 dsh plugin --profile web add --save-exact file:/path/to/DSH\ Computer\ Use.app/Contents/Resources/Plugin
 ```
 
-`cordis.patch.yml` installs both the Host runtime and the model-facing `computer_observe` / `computer_action` tools. No manual edits to user profile YAML or shipped presets are required. A running DSH Host must be restarted after install or upgrade.
+`cordis.patch.yml` installs the Host runtime and registers `computer_observe` / `computer_action` in DSH's global tool layer, inherited by every agent preset. No manual edits to user profile YAML or preset copies are required. The setup center detects an older dependency-only installation and repairs the missing bundle registration. A running DSH Host must be restarted after install, repair, or upgrade.
 
 ## Build from source
 

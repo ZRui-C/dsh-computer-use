@@ -1,8 +1,10 @@
 import Foundation
+import DSHComputerUseCore
 
 struct ProductInstallState {
     let dshExecutable: String?
     let pluginInstalled: Bool
+    let pluginNeedsRepair: Bool
 }
 
 struct ProductInstallResult {
@@ -14,9 +16,11 @@ enum ProductInstaller {
     private static let packageName = "dsh-computer-use"
 
     static func inspect() -> ProductInstallState {
-        ProductInstallState(
+        let status = installedPluginStatus()
+        return ProductInstallState(
             dshExecutable: findDSHExecutable(),
-            pluginInstalled: installedPluginVersion() != nil
+            pluginInstalled: status == .active,
+            pluginNeedsRepair: status == .dependencyOnly
         )
     }
 
@@ -89,8 +93,8 @@ enum ProductInstaller {
             return ProductInstallResult(
                 succeeded: true,
                 message: localized(
-                    zh: "DSH 插件已安装。重启正在运行的 DSH Host 后生效。",
-                    en: "DSH plugin installed. Restart the running DSH Host to load it."
+                    zh: "DSH 插件已全局启用，所有 agent preset 均可使用。重启正在运行的 DSH Host 后生效。",
+                    en: "DSH plugin enabled globally for every agent preset. Restart the running DSH Host to load it."
                 )
             )
         } catch {
@@ -134,19 +138,17 @@ enum ProductInstaller {
         }
     }
 
-    private static func installedPluginVersion() -> String? {
+    private static func installedPluginStatus() -> DSHProfilePluginStatus {
         let environment = ProcessInfo.processInfo.environment
         let home = environment["DSH_HOME"].map(URL.init(fileURLWithPath:))
             ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".dsh")
         let manifest = home
             .appendingPathComponent("profiles/web/package.json")
-        guard let data = try? Data(contentsOf: manifest),
-              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let dependencies = object["dependencies"] as? [String: Any],
-              let version = dependencies[packageName] as? String else {
-            return nil
-        }
-        return version
+        guard let data = try? Data(contentsOf: manifest) else { return .missing }
+        return DSHProfileManifestInspector.pluginStatus(
+            in: data,
+            packageName: packageName
+        )
     }
 
     private static func isExecutable(_ path: String) -> Bool {
