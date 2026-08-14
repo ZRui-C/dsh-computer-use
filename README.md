@@ -20,6 +20,8 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-202329?style=flat-square&logo=apple&logoColor=white">
   <img alt="Universal 2" src="https://img.shields.io/badge/Universal%202-arm64%20%7C%20x86__64-4DBD88?style=flat-square">
   <img alt="Apache 2.0" src="https://img.shields.io/badge/license-Apache--2.0-F06A5B?style=flat-square">
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/ZRui-C/dsh-computer-use?style=flat-square&logo=github&logoColor=white">
+  <img alt="GitHub release" src="https://img.shields.io/github/v/release/ZRui-C/dsh-computer-use?style=flat-square&logo=github&logoColor=white">
 </p>
 
 ## Install
@@ -115,5 +117,11 @@ Public releases require a `Developer ID Application` identity and notarization. 
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
+
+## Community
+
+- [GitHub Discussions](https://github.com/ZRui-C/dsh-computer-use/discussions) — ask questions, share usage, report ideas
+- [DeepSeek Harness Discord](https://discord.gg/Ycq5dCaS4) — the wider DSH ecosystem
+- Star the repo if DSH Computer Use saves your pointer 🖱️
 
 Licensed under [Apache-2.0](LICENSE). This independent project is not endorsed by Apple. “DeepSeek” and related marks belong to their respective owners; the name is used only to describe compatibility with DeepSeek Harness/DSH.

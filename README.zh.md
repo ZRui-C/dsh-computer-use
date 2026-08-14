@@ -20,6 +20,8 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-202329?style=flat-square&logo=apple&logoColor=white">
   <img alt="Universal 2" src="https://img.shields.io/badge/Universal%202-arm64%20%7C%20x86__64-4DBD88?style=flat-square">
   <img alt="Apache 2.0" src="https://img.shields.io/badge/license-Apache--2.0-F06A5B?style=flat-square">
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/ZRui-C/dsh-computer-use?style=flat-square&logo=github&logoColor=white">
+  <img alt="GitHub release" src="https://img.shields.io/github/v/release/ZRui-C/dsh-computer-use?style=flat-square&logo=github&logoColor=white">
 </p>
 
 ## 安装
@@ -115,5 +117,11 @@ pnpm run package:dmg
 - [贡献指南](CONTRIBUTING.md)
 - [更新记录](CHANGELOG.md)
 - [第三方归属](THIRD_PARTY_NOTICES.md)
+
+## 社区
+
+- [GitHub Discussions](https://github.com/ZRui-C/dsh-computer-use/discussions) — 提问、分享用法、反馈想法
+- [DeepSeek Harness Discord](https://discord.gg/Ycq5dCaS4) — 更大的 DSH 生态
+- 觉得好用就点个 Star ⭐，让更多人发现它
 
 项目采用 [Apache-2.0](LICENSE) 许可证。本项目不受 Apple 背书；“DeepSeek”等名称归各自权利人所有，本文仅用于说明与 DeepSeek Harness/DSH 的兼容关系。
