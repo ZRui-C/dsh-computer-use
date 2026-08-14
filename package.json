@@ -1,9 +1,19 @@
 {
   "name": "dsh-computer-use",
   "version": "0.3.0",
-  "private": true,
   "description": "Text-first browser and background macOS computer use for DSH",
   "license": "Apache-2.0",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "computer-use",
+    "macos",
+    "browser-automation",
+    "accessibility",
+    "desktop-automation",
+    "agent-tools"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ZRui-C/dsh-computer-use.git"
@@ -36,10 +46,14 @@
       "patch": "./cordis.patch.yml"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "pnpm run build:ts && pnpm run build:native",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:native": "node scripts/build-native.mjs",
+    "prepare": "pnpm run build:ts",
     "package:dmg": "node scripts/package-release.mjs --skip-notarize",
     "release:macos": "node scripts/package-release.mjs",
     "smoke:native": "node scripts/smoke-native.mjs",

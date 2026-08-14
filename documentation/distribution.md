@@ -110,3 +110,20 @@ Never place these values in repository variables, source files, workflow logs, i
 ## User upgrade behavior
 
 Replacing the App in `/Applications` preserves the bundle ID and designated requirement. A release signed by the same Team ID normally retains TCC grants. Open the setup center after upgrading and select **Reinstall** to refresh the DSH file dependency, then restart the running DSH Host.
+
+## Publishing the plugin bundle to npm
+
+The TypeScript bundle can be installed without a DMG when the app is already present in `/Applications` (the runtime falls back to `/Applications/DSH Computer Use.app`):
+
+```bash
+npm login
+npm publish
+```
+
+`prepare` rebuilds `dist/` from TypeScript before packing, so the tarball always ships current build output. The package name `dsh-computer-use` is registered on the public registry. Users then install it with:
+
+```bash
+dsh plugin --profile web add dsh-computer-use
+```
+
+The native helper is **not** part of the npm package; it is resolved from the installed app in `/Applications`. Distribute the DMG as the primary install path and use npm as the convenience path for the bundle layer.

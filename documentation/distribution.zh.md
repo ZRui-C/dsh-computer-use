@@ -131,3 +131,20 @@ Release workflow 需要：
 ## 用户升级
 
 用新版本替换 `/Applications` 中的 App，会保留 bundle ID 和 designated requirement。同一 Team ID 签发的升级通常能延续现有 TCC 授权。升级后打开设置中心点击“重新安装”以刷新 DSH file dependency，然后重启 DSH Host。
+
+## 发布插件包到 npm
+
+当 App 已安装在 `/Applications` 时（运行时回退到 `/Applications/DSH Computer Use.app`），TS 插件包可以脱离 DMG 单独安装：
+
+```bash
+npm login
+npm publish
+```
+
+`prepare` 会在打包前从 TypeScript 重新构建 `dist/`，因此 tarball 始终包含最新构建产物。`dsh-computer-use` 这个包名已预留，发布后用户可这样安装：
+
+```bash
+dsh plugin --profile web add dsh-computer-use
+```
+
+原生 helper **不在** npm 包内，运行时从 `/Applications` 中的 App 解析。请以 DMG 作为主要安装路径，npm 作为 bundle 层的便捷路径。
