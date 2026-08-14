@@ -1,6 +1,7 @@
 {
   "name": "dsh-computer-use",
   "version": "0.3.0",
+  "private": true,
   "description": "Text-first browser and background macOS computer use for DSH",
   "license": "Apache-2.0",
   "keywords": [
@@ -46,14 +47,12 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "pnpm run build:ts && pnpm run build:native",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:native": "node scripts/build-native.mjs",
     "prepare": "npm run build:ts",
+    "prepublishOnly": "node scripts/refuse-npm-publish.mjs",
     "package:dmg": "node scripts/package-release.mjs --skip-notarize",
     "release:macos": "node scripts/package-release.mjs",
     "smoke:native": "node scripts/smoke-native.mjs",
