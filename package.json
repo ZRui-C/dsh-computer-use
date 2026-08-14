@@ -53,7 +53,7 @@
     "build": "pnpm run build:ts && pnpm run build:native",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:native": "node scripts/build-native.mjs",
-    "prepare": "pnpm run build:ts",
+    "prepare": "npm run build:ts",
     "package:dmg": "node scripts/package-release.mjs --skip-notarize",
     "release:macos": "node scripts/package-release.mjs",
     "smoke:native": "node scripts/smoke-native.mjs",
