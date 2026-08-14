@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -61,7 +62,8 @@ try {
     exec('/usr/sbin/spctl', ['--assess', '--type', 'open', '--context', 'context:primary-signature', '--verbose=2', dmg])
   }
 
-  const checksum = exec('/usr/bin/shasum', ['-a', '256', dmg], true)
+  const digest = crypto.createHash('sha256').update(fs.readFileSync(dmg)).digest('hex')
+  const checksum = `${digest}  ${path.basename(dmg)}\n`
   fs.writeFileSync(`${dmg}.sha256`, checksum)
   process.stdout.write(`${dmg}\n${checksum}`)
 } finally {
