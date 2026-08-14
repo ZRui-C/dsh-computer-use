@@ -42,6 +42,38 @@ struct CaptureWindowCandidate: Equatable {
     var layer: Int
 }
 
+private final class UncheckedCaptureOperation<T>: @unchecked Sendable {
+    private let body: () async throws -> T
+
+    init(_ body: @escaping () async throws -> T) {
+        self.body = body
+    }
+
+    func run() async throws -> T {
+        try await body()
+    }
+}
+
+private final class LockedCaptureResult<T>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storage: Result<T, Error>?
+
+    func store(_ result: Result<T, Error>) {
+        lock.lock()
+        storage = result
+        lock.unlock()
+    }
+
+    func load() -> Result<T, Error> {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let storage else {
+            preconditionFailure("Capture task completed without a result")
+        }
+        return storage
+    }
+}
+
 /// Screen capture backed by ScreenCaptureKit one-shot screenshots.
 public final class ScreenCaptureManager {
     public init() {}
@@ -249,14 +281,15 @@ public final class ScreenCaptureManager {
 
     private func runAsyncCapture<T>(_ body: @escaping () async throws -> T) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
-        var boxed: Result<T, Error>?
+        let boxed = LockedCaptureResult<T>()
+        let operation = UncheckedCaptureOperation(body)
         Task {
-            do { boxed = .success(try await body()) }
-            catch { boxed = .failure(error) }
+            do { boxed.store(.success(try await operation.run())) }
+            catch { boxed.store(.failure(error)) }
             semaphore.signal()
         }
         semaphore.wait()
-        return try boxed!.get()
+        return try boxed.load().get()
     }
 
     private func shareableDisplayCount() -> Int {
