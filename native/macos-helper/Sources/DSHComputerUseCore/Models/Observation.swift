@@ -123,17 +123,20 @@ public enum OCRMode: String, Codable, Equatable {
 public struct ObserveParams: Codable, Equatable {
     public var maxNodes: Int?
     public var ocr: OCRMode?
+    public var ocrLanguages: [String]?
     public var screenshotPath: String?
     public var target: TargetDescriptor?
 
     public init(
         maxNodes: Int? = nil,
         ocr: OCRMode? = nil,
+        ocrLanguages: [String]? = nil,
         screenshotPath: String? = nil,
         target: TargetDescriptor? = nil
     ) {
         self.maxNodes = maxNodes
         self.ocr = ocr
+        self.ocrLanguages = ocrLanguages
         self.screenshotPath = screenshotPath
         self.target = target
     }
@@ -152,6 +155,7 @@ public struct DesktopObservation: Codable, Equatable {
     public var warnings: [String]
     public var screenshotPath: String?
     public var nodes: [AXNode]
+    public var truncated: Bool?
 
     public init(
         timestamp: Double,
@@ -162,7 +166,8 @@ public struct DesktopObservation: Codable, Equatable {
         permissions: PermissionsReport,
         warnings: [String] = [],
         screenshotPath: String? = nil,
-        nodes: [AXNode] = []
+        nodes: [AXNode] = [],
+        truncated: Bool? = nil
     ) {
         self.timestamp = timestamp
         self.frontmostApp = frontmostApp
@@ -173,5 +178,6 @@ public struct DesktopObservation: Codable, Equatable {
         self.warnings = warnings
         self.screenshotPath = screenshotPath
         self.nodes = nodes
+        self.truncated = truncated
     }
 }

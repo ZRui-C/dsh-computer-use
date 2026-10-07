@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- Discover AX semantic actions through the proper action-name API.
+- Traverse deep desktop AX trees with bounded depth/node budgets and explicit truncation diagnostics.
+- Add `ocrLanguages` configuration and automatic OCR language detection, including browser and display fallback paths.
+- Test against the DSH 0.2.1-alpha.1 dependency family while preserving existing peer ranges.
+
 - Register the Computer Use tools in the global DSH tool layer so every agent preset inherits them.
 - Detect and repair profiles where the package dependency exists but `dsh.profile.bundles` does not enable it.
 

@@ -65,7 +65,7 @@ public final class ComputerUseAgent {
 
         case "ocrFile":
             let request: OCRFileRequest = try CodableBridge.fromJSONValue(params)
-            let result = try ocr.recognize(imageURL: URL(fileURLWithPath: request.path))
+            let result = try ocr.recognize(imageURL: URL(fileURLWithPath: request.path), languages: request.languages ?? [])
             return try CodableBridge.toJSONValue(result)
 
         case "shutdown":

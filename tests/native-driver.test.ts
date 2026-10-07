@@ -1,4 +1,6 @@
 import os from 'node:os'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { resolveConfig } from '../src/config.js'
 import type { NativeObservation } from '../src/contracts.js'
@@ -72,6 +74,33 @@ const execution = {
 }
 
 describe('NativeDesktopDriver protocol adapter', () => {
+  it('propagates OCR languages for observations, post-action observations, and browser OCR', async () => {
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), 'native-ocr-config-'))
+    const fake = {
+      observeDesktop: vi.fn(async () => ({ ...observation(), truncated: true })),
+      performDesktop: vi.fn(async () => ({ status: 'ok' })),
+      ocrFile: vi.fn(async () => []),
+    }
+    const driver = new NativeDesktopDriver(fake as unknown as NativeClient, resolveConfig({
+      stateDir, actionSettleMs: 0, ocrLanguages: ['zh-Hans', 'en-US'],
+    }))
+    try {
+      const snapshot = await driver.observe({ surface: 'desktop' }, execution)
+      expect(snapshot.truncated).toBe(true)
+      await driver.action({ surface: 'desktop', action: 'wait', durationMs: 0 }, execution)
+      expect(fake.observeDesktop).toHaveBeenCalledTimes(2)
+      expect(fake.observeDesktop).toHaveBeenLastCalledWith(expect.objectContaining({
+        ocrLanguages: ['zh-Hans', 'en-US'],
+      }), execution.signal)
+      await driver.ocrBuffer(Buffer.from('fixture'), execution)
+      expect(fake.ocrFile).toHaveBeenCalledWith(expect.any(String), execution.signal, ['zh-Hans', 'en-US'])
+      const directory = path.join(stateDir, 'ocr', execution.sessionId)
+      expect(await fs.readdir(directory)).toEqual([])
+    } finally {
+      await fs.rm(stateDir, { recursive: true, force: true })
+    }
+  })
+
   it('normalizes AX roles and gives OCR-only text a coordinate ref', async () => {
     const { driver } = fixture()
     const snapshot = await driver.observe({ surface: 'desktop', ocr: 'always' }, execution)

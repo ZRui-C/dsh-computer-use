@@ -9,7 +9,8 @@ import type {
   SemanticNode,
 } from '../../src/contracts.js'
 
-export const CHROME_EXECUTABLE = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+export const CHROME_EXECUTABLE = process.env.COMPUTER_USE_CHROME_PATH
+  ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
 export interface DriverFixture {
   driver: BrowserDriver

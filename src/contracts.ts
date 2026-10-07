@@ -169,6 +169,7 @@ export interface NativeObservation {
   windowFrame?: Rect
   displays?: Rect[]
   nodes: NativeNode[]
+  truncated?: boolean
   warnings?: string[]
   screenshotPath?: string
 }

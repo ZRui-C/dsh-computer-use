@@ -40,3 +40,7 @@ pnpm run smoke:native
 ```
 
 Do not commit generated app bundles, DMGs, signing certificates, notarization keys, API keys, sockets, screenshots, or local DSH state.
+
+For browser fixture tests on another supported development platform, set
+`COMPUTER_USE_CHROME_PATH` to an installed Chromium executable. This changes only
+the test fixture path; it does not enable macOS helper tests on non-macOS hosts.

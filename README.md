@@ -114,6 +114,14 @@ pnpm run package:dmg
 
 Public releases require a `Developer ID Application` identity and notarization. See [documentation/distribution.md](documentation/distribution.md) for the exact local and GitHub Actions flows.
 
+## OCR languages and bounded desktop observations
+
+OCR detects languages automatically by default. Set `ocrLanguages` on the `computer-use-host` configuration to an ordered list of Vision language identifiers, for example `["zh-Hans", "en-US"]`, to prefer Simplified Chinese and English. The same setting applies to desktop capture, display fallback, and browser OCR. Unsupported language identifiers produce an explicit OCR warning/error rather than silently dropping text; supported languages depend on the installed macOS version.
+
+Desktop AX traversal supports up to 64 levels and at most 2,000 nodes (`maxNodes` still defaults to 250 in the host). Depth/node cutoffs set `truncated` and include a warning. A bounded observation may still omit controls; narrow the view or observe again instead of guessing refs.
+
+Development dependencies target DSH `0.2.1-alpha.1`; the earlier `0.1.0-rc.6` peer ranges remain accepted. This does not imply that every intervening DSH version or macOS runtime has been tested.
+
 ## Tool contract
 
 `computer_observe` returns `interactive`, `full`, or `changes` snapshots for `browser` and `desktop`, with optional query filtering and `auto | always | never` OCR.
