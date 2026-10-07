@@ -82,6 +82,33 @@ dsh plugin --profile web add --save-exact file:/path/to/DSH\ Computer\ Use.app/C
 
 `cordis.patch.yml` 会安装 Host runtime，并将 `computer_observe` / `computer_action` 注册到 DSH 的 global tool layer，由所有 agent preset 继承。不要求用户手改 profile YAML 或复制 preset。设置中心会识别旧版“只有 dependency、没有启用 bundle”的状态并提供修复。安装、修复或升级后需要重启正在运行的 DSH Host。
 
+### 官方 DeepSeek Harness 桌面 App
+
+在设置中心的“安装到”中选择“官方 DeepSeek Harness App”。它使用独立的 `desktop` profile；Web 安装成功不代表桌面 App 已安装插件。默认选项仍为 **Web / DSH for Mac**。
+
+1. 先安装并打开官方 DeepSeek Harness App 一次，让它完成 profile 初始化。
+2. 使用 **⌘Q 完全退出** App。仅关闭窗口会隐藏 App，不会停止 Host。安装或更新前，请先结束其他插件／CLI 操作。
+3. 打开 DSH Computer Use，选择官方 App 目标，再安装插件。默认检查 `/Applications` 和 `~/Applications` 中的 `DeepSeek Harness.app`；移动或重命名过的 App 可用“选择…”指定，也可选择它内置的 dsh 命令。`DSH_DESKTOP_EXECUTABLE` 同样可指定该命令。
+4. 重新打开官方 App。“打开 DSH”会打开所选 App，不依赖固定的 Host 端口。
+
+安装器使用 App 自带的 launcher，不要求先注册终端命令：
+
+```bash
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
+  plugin --profile desktop add --save-exact \
+  "file:/Applications/DSH Computer Use.app/Contents/Resources/Plugin"
+```
+
+安装器不直接修改 profile manifest，不通过 CLI 启动受保留的 desktop profile，不使用 npm 安装的 dsh 修改它，也不绕过 profile 锁。安装／修复状态按所选目标读取 `DSH_HOME`（默认 `~/.dsh`）下对应的 profile，两个目标分别记忆命令路径。请确保 `DSH_HOME` 与目标 Host 一致。状态检查和 Desktop launcher 使用设置 App 的环境；Web 安装保留登录 shell 的环境。如果自定义 `DSH_HOME` 只在 shell 中设置，请从相同环境启动设置 App，确保状态显示读取正确的 profile。
+
+**DSH for Mac** 是另一款 SwiftUI 客户端，其本地模式使用 `web` Host，选择 **Web / DSH for Mac** 即可。若连接外部 Host，需在该 Host 所在的 Mac 安装插件；本机安装不会给远程 Host 增加电脑访问能力。
+
+两个模式加载同一套 Host 端工具。插件直接使用 DSH 内部服务，无需绕过桌面 App 的认证或猜测其随机 HTTP 端口。辅助功能、屏幕录制仍由独立的 **DSH Computer Use.app** 持有，通过 macOS LaunchServices 启动。切换目标不会自动申请新权限。
+
+若改用官方 App 的插件安装对话框，请将本地插件路径填入“包”输入框。“Registry／镜像源”填写 npm registry（例如 `https://registry.npmjs.org/`），不能填 GitHub 仓库网址。推荐安装源为 App 内嵌的已编译插件，本仓库没有发布 npm 包。
+
+依据：[上游 Desktop 安装与命令规范](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.1/apps/desktop/README.md#bundled-command-runtime)、[DSH for Mac 连接方式](https://github.com/ZRui-C/dsh-for-mac#连接方式)。适配以已核对的 `0.2.0-rc.2` 和 `0.2.1-alpha.1` Desktop 规范为准；缺少该 launcher 的旧版桌面 App 需要先升级。真实 macOS GUI、TCC 授权和已安装桌面 App 的完整链路仍需实机验收，单元测试和 CI 构建不替代这些验证。
+
 ## 从源码构建
 
 要求：macOS 14+、Xcode/Swift 5.9+、Node.js 22+、pnpm 11+、DSH 和 Google Chrome。
@@ -120,7 +147,7 @@ OCR 默认自动检测语言。可在 `computer-use-host` 配置中设置有优�
 
 桌面 AX 树最多遍历 64 层、2,000 个节点（Host 的 `maxNodes` 默认仍为 250）。达到深度或节点上限时会返回 `truncated` 和警告。受限快照仍可能遗漏控件，请缩小视图或重新观察，不要猜测引用。
 
-开发依赖对齐 DSH `0.2.1-alpha.1`，同时保留原先 `0.1.0-rc.6` 的 peer 版本范围。这不代表每个中间版本或 macOS 实机环境均已测试。
+开发依赖对齐 DSH `0.2.1-alpha.1`，显式接纳 `0.2.0-rc.2`，同时保留原先 `0.1.0-rc.6` 的 peer 版本范围。CI 对三个版本分别建立隔离依赖树（`node scripts/test-compat.mjs <版本>`），运行 TypeScript 类型检查、构建和非浏览器协议测试。这不代表每个中间版本或 macOS 实机环境均已测试。
 
 ## 工具协议
 

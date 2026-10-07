@@ -40,9 +40,9 @@ open -a "DSH Computer Use"
 1. Download the latest `DSH-Computer-Use-*-universal.dmg` from [Releases](https://github.com/ZRui-C/dsh-computer-use/releases/latest).
 2. Drag **DSH Computer Use** into **Applications** and open it.
 
-With either method, authorize **Accessibility** and **Screen Recording**, select **Install** under **DSH Plugin**, then restart the running DSH Host.
+With either method, authorize **Accessibility** and **Screen Recording**, choose the target under **Install into**, then select **Install** under **DSH Plugin**. Web remains the default; restart its running Host afterward. For the official Desktop App, initialize and fully quit it before installing, then reopen it.
 
-The Homebrew Cask and official DMG install the same Universal 2, Developer ID signed, Apple-notarized app. Users do not need Xcode, Swift, or this source checkout. DSH and Google Chrome must already be installed.
+The Homebrew Cask and official DMG install the same Universal 2, Developer ID signed, Apple-notarized app. Users do not need Xcode, Swift, or this source checkout. DSH (CLI or the official Desktop App) and Google Chrome must already be installed.
 
 <p align="center">
   <img src="docs/assets/setup-center.png" width="760" alt="DSH Computer Use setup center">
@@ -74,13 +74,40 @@ On macOS 26, Stage Manager may expose a shelved window only as a small WindowSer
 
 ## DSH integration
 
-The embedded package declares a DSH bundle in `package.json`. The setup center runs the official equivalent of:
+The embedded package declares a DSH bundle in `package.json`. The default **Web / DSH for Mac** target runs the official equivalent of:
 
 ```bash
 dsh plugin --profile web add --save-exact file:/path/to/DSH\ Computer\ Use.app/Contents/Resources/Plugin
 ```
 
 `cordis.patch.yml` installs the Host runtime and registers `computer_observe` / `computer_action` in DSH's global tool layer, inherited by every agent preset. No manual edits to user profile YAML or preset copies are required. The setup center detects an older dependency-only installation and repairs the missing bundle registration. A running DSH Host must be restarted after install, repair, or upgrade.
+
+### Official DeepSeek Harness Desktop App
+
+Choose **Official DeepSeek Harness App** in the setup center. This installs into the App's separate `desktop` profile; a successful Web install does not mean the App has the plugin.
+
+1. Install and launch the official DeepSeek Harness App once to initialize its profile.
+2. Fully quit it with **Command-Q**. Closing its window only hides it. Finish other plugin/CLI operations before installing or updating either app.
+3. Open DSH Computer Use, select the official App target, and install. It discovers `DeepSeek Harness.app` in `/Applications` or `~/Applications`. Use **Choose…** for a moved/renamed App or its bundled command; `DSH_DESKTOP_EXECUTABLE` can also identify that command.
+4. Reopen the official App. **Open DSH** opens the selected application, without assuming a fixed Host port.
+
+The installer invokes the App's own launcher, without requiring its optional terminal-command registration:
+
+```bash
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
+  plugin --profile desktop add --save-exact \
+  "file:/Applications/DSH Computer Use.app/Contents/Resources/Plugin"
+```
+
+It does not edit profile manifests itself, boot the reserved Desktop profile through the CLI, use npm-installed `dsh` for Desktop, or bypass profile locks. Install/repair status is read from the selected profile under `DSH_HOME` (default `~/.dsh`), and launcher choices are remembered separately. Use the same `DSH_HOME` as the Host you intend to configure. Status inspection and the Desktop launcher use the setup app's environment. Web installation retains its login-shell environment; if your shell alone sets a custom `DSH_HOME`, launch the setup app with that same environment so its status display reads the correct profile.
+
+**DSH for Mac** is a different SwiftUI client and uses the **Web / DSH for Mac** target for its local `web` Host. When it connects to an external Host, install the plugin on that Host's Mac instead. Installing locally does not add computer access to a remote Host.
+
+Both modes load the same host-side tools. Desktop authentication and its random HTTP port need no workaround: the plugin uses DSH services inside the Host. The separate **DSH Computer Use.app** still owns Accessibility and Screen Recording permissions and launches through macOS LaunchServices. No new permission is requested automatically by switching targets.
+
+If using the official App's plugin dialog instead, put the local package path in the **package** field. The **Registry** field is for an npm registry (for example `https://registry.npmjs.org/`), not a GitHub repository URL. The embedded compiled package is the supported install source; this repository is not an npm-published package.
+
+Compatibility references: [upstream Desktop installation ownership and command runtime](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.1/apps/desktop/README.md#bundled-command-runtime), [DSH for Mac connection modes](https://github.com/ZRui-C/dsh-for-mac#连接方式). The adapter targets the verified `0.2.0-rc.2` and `0.2.1-alpha.1` Desktop contracts; older Desktop builds lacking this launcher must be upgraded. macOS GUI, TCC authorization, and a real installed Desktop end-to-end flow still require manual acceptance; unit tests and CI builds do not establish those results.
 
 ## Build from source
 
@@ -120,7 +147,7 @@ OCR detects languages automatically by default. Set `ocrLanguages` on the `compu
 
 Desktop AX traversal supports up to 64 levels and at most 2,000 nodes (`maxNodes` still defaults to 250 in the host). Depth/node cutoffs set `truncated` and include a warning. A bounded observation may still omit controls; narrow the view or observe again instead of guessing refs.
 
-Development dependencies target DSH `0.2.1-alpha.1`; the earlier `0.1.0-rc.6` peer ranges remain accepted. This does not imply that every intervening DSH version or macOS runtime has been tested.
+Development dependencies target DSH `0.2.1-alpha.1`. Explicit peers also accept `0.2.0-rc.2`, and the earlier `0.1.0-rc.6` peer ranges remain accepted. CI checks isolated dependency trees for all three versions (`node scripts/test-compat.mjs <version>`): TypeScript typecheck/build and non-browser contract tests. This does not imply that every intervening DSH version or macOS runtime has been tested.
 
 ## Tool contract
 

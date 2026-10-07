@@ -4,7 +4,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- Add an explicit official DeepSeek Harness Desktop target alongside the existing Web / DSH for Mac integration, with separate profile inspection, bundled launcher discovery, and safe initialize/quit/reopen guidance.
+
 ### Fixed
+
+- Explicitly allow DSH `0.2.0-rc.2` after isolated compatibility tests; keep rc.6 and alpha coverage in CI.
 
 - Discover AX semantic actions through the proper action-name API.
 - Traverse deep desktop AX trees with bounded depth/node budgets and explicit truncation diagnostics.

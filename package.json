@@ -62,17 +62,18 @@
     "test": "vitest run",
     "test:browser": "vitest run tests/browser",
     "test:native": "swift test --package-path native/macos-helper",
-    "check": "pnpm run check:pages && pnpm run typecheck && pnpm run test && pnpm run build"
+    "check": "pnpm run check:pages && pnpm run typecheck && pnpm run test && pnpm run build",
+    "test:compat": "node scripts/test-compat.mjs"
   },
   "dependencies": {
     "playwright-core": "^1.62.1"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1 || 4.0.5-alpha.1",
-    "@deepseek-ai/dsh-agent": "^0.1.0-rc.6 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-subprocess": "^0.1.0-rc.6 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6 || 0.2.1-alpha.1",
-    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6 || 0.2.1-alpha.1",
+    "@deepseek-ai/dsh-agent": "^0.1.0-rc.6 || 0.2.1-alpha.1 || 0.2.0-rc.2",
+    "@deepseek-ai/dsh-subprocess": "^0.1.0-rc.6 || 0.2.1-alpha.1 || 0.2.0-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6 || 0.2.1-alpha.1 || 0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6 || 0.2.1-alpha.1 || 0.2.0-rc.2",
     "@deepseek-ai/schemastery": "^3.18.1 || 3.18.5-alpha.1"
   },
   "devDependencies": {
