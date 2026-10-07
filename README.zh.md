@@ -114,6 +114,14 @@ pnpm run package:dmg
 
 公开发布需要 `Developer ID Application` 证书和 Apple 公证。完整的本地与 GitHub Actions 流程见 [documentation/distribution.zh.md](documentation/distribution.zh.md)。
 
+## OCR 语言与桌面观察边界
+
+OCR 默认自动检测语言。可在 `computer-use-host` 配置中设置有优先级的 Vision 语言标识列表 `ocrLanguages`，例如 `["zh-Hans", "en-US"]`，优先识别简体中文和英语。此设置同时作用于桌面窗口、主显示器回退和浏览器 OCR。不受支持的语言会返回明确的 OCR 警告或错误，不再静默丢失识别结果；可用语言取决于 macOS 版本。
+
+桌面 AX 树最多遍历 64 层、2,000 个节点（Host 的 `maxNodes` 默认仍为 250）。达到深度或节点上限时会返回 `truncated` 和警告。受限快照仍可能遗漏控件，请缩小视图或重新观察，不要猜测引用。
+
+开发依赖对齐 DSH `0.2.1-alpha.1`，同时保留原先 `0.1.0-rc.6` 的 peer 版本范围。这不代表每个中间版本或 macOS 实机环境均已测试。
+
 ## 工具协议
 
 `computer_observe` 返回 `browser` 或 `desktop` 的 `interactive`、`full`、`changes` 文本快照，支持 query 过滤和 `auto | always | never` OCR。

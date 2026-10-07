@@ -33,8 +33,10 @@ public struct OCRResult: Codable, Equatable {
 /// Parameters for the `ocrFile` method.
 public struct OCRFileRequest: Codable, Equatable {
     public var path: String
+    public var languages: [String]?
 
-    public init(path: String) {
+    public init(path: String, languages: [String]? = nil) {
         self.path = path
+        self.languages = languages
     }
 }

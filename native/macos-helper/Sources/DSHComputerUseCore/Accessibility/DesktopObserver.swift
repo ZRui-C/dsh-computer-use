@@ -7,7 +7,7 @@ import CoreGraphics
 /// the current frontmost app. OCR is derived from the selected window whenever
 /// ScreenCaptureKit can resolve it.
 public final class DesktopObserver {
-    public static let maxDepth = 8
+    public static let maxDepth = AXAccessibility.defaultMaxDepth
     public static let defaultMaxNodes = 200
 
     private let screenCapture = ScreenCaptureManager()
@@ -18,12 +18,13 @@ public final class DesktopObserver {
     public func observe(params: ObserveParams = ObserveParams()) -> DesktopObservation {
         let timestamp = Date().timeIntervalSince1970
         let permissions = Permissions.report
-        let maxNodes = max(1, params.maxNodes ?? Self.defaultMaxNodes)
+        let maxNodes = min(AXAccessibility.maximumNodes, max(1, params.maxNodes ?? Self.defaultMaxNodes))
         let ocrMode = params.ocr ?? .auto
 
         var appInfo: AppInfo?
         var windowInfo: WindowInfo?
         var nodes: [AXNode] = []
+        var truncated = false
         var warnings: [String] = []
         var screenshotPath: String?
 
@@ -50,13 +51,17 @@ public final class DesktopObserver {
                 let axApp = AXAccessibility.application(pid: pid)
                 AXAccessibility.prepare(axApp)
                 windowInfo = self.windowInfo(for: axApp, target: params.target)
-                nodes = AXAccessibility.observe(
+                let observation = AXAccessibility.observeWithDiagnostics(
                     app: axApp,
                     pid: pid,
                     target: params.target,
                     maxDepth: Self.maxDepth,
                     maxNodes: maxNodes
                 )
+                nodes = observation.nodes
+                truncated = observation.hitDepthLimit || observation.hitNodeLimit
+                if observation.hitDepthLimit { warnings.append("Accessibility tree reached depth limit \(Self.maxDepth)") }
+                if observation.hitNodeLimit { warnings.append("Accessibility tree reached node limit \(maxNodes)") }
                 if nodes.isEmpty {
                     warnings.append("Accessibility granted but no AX window tree was captured")
                 }
@@ -99,7 +104,7 @@ public final class DesktopObserver {
                         )
                     }
 
-                    let observations = (try? ocr.recognize(cgImage: captured.image)) ?? []
+                    let observations = recognizeText(captured.image, languages: params.ocrLanguages ?? [], warnings: &warnings)
                     if observations.isEmpty {
                         warnings.append("OCR produced no text")
                     }
@@ -126,6 +131,11 @@ public final class DesktopObserver {
             }
         }
 
+        if nodes.count > maxNodes {
+            nodes = Array(nodes.prefix(maxNodes))
+            truncated = true
+            warnings.append("Combined AX/OCR observation reached node limit \(maxNodes)")
+        }
         let displays = displayList()
         return DesktopObservation(
             timestamp: timestamp,
@@ -136,8 +146,18 @@ public final class DesktopObserver {
             permissions: permissions,
             warnings: warnings,
             screenshotPath: screenshotPath,
-            nodes: nodes
+            nodes: nodes,
+            truncated: truncated
         )
+    }
+
+    private func recognizeText(_ image: CGImage, languages: [String], warnings: inout [String]) -> [OCRTextObservation] {
+        do {
+            return try ocr.recognize(cgImage: image, languages: languages)
+        } catch {
+            warnings.append("OCR failed: \(error.localizedDescription)")
+            return []
+        }
     }
 
     private func captureTarget(
@@ -175,7 +195,7 @@ public final class DesktopObserver {
                     screenshotPath = requestedPath
                 }
             }
-            let observations = (try? ocr.recognize(cgImage: captured.image)) ?? []
+            let observations = recognizeText(captured.image, languages: params.ocrLanguages ?? [], warnings: &warnings)
             existingNodes.append(contentsOf: NodeMerger.ocrNodes(
                 from: observations,
                 origin: captured.origin,

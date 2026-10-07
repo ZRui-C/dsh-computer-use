@@ -9,10 +9,19 @@ public final class VisionOCRService {
 
     /// Recognizes text in an in-memory `CGImage`, returning pixel-space
     /// top-left-origin frames.
-    public func recognize(cgImage: CGImage) throws -> [OCRTextObservation] {
+    public func recognize(cgImage: CGImage, languages: [String] = []) throws -> [OCRTextObservation] {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
+        request.automaticallyDetectsLanguage = languages.isEmpty
+        if !languages.isEmpty {
+            let supported = try request.supportedRecognitionLanguages()
+            let unsupported = languages.filter { !supported.contains($0) }
+            guard unsupported.isEmpty else {
+                throw AgentError.ocr("Unsupported OCR languages: \(unsupported.joined(separator: ", "))")
+            }
+            request.recognitionLanguages = languages
+        }
 
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         try handler.perform([request])
@@ -34,14 +43,14 @@ public final class VisionOCRService {
 
     /// Recognizes text in an image file, returning an `OCRResult` whose frames
     /// are relative to the image (top-left origin, pixels).
-    public func recognize(imageURL: URL) throws -> OCRResult {
+    public func recognize(imageURL: URL, languages: [String] = []) throws -> OCRResult {
         let start = Date()
         guard let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil),
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             throw AgentError.ocr("Cannot read image at \(imageURL.path)")
         }
 
-        let observations = try recognize(cgImage: image)
+        let observations = try recognize(cgImage: image, languages: languages)
 
         return OCRResult(
             observations: observations,

@@ -61,6 +61,7 @@ interface WireObservation {
   warnings: string[]
   screenshotPath?: string
   nodes: WireNode[]
+  truncated?: boolean
 }
 
 interface WireActionResult {
@@ -130,6 +131,7 @@ export class NativeClient {
             }),
       })),
       warnings: [...result.warnings],
+      truncated: result.truncated ?? false,
       ...(result.screenshotPath === undefined ? {} : { screenshotPath: result.screenshotPath }),
     }
   }
@@ -141,8 +143,8 @@ export class NativeClient {
     return { status: status.length === 0 ? 'ok' : status }
   }
 
-  async ocrFile(filePath: string, signal: AbortSignal): Promise<Array<{ text: string; confidence: number; frame: Rect }>> {
-    const result = await this.request<WireOcrResult>('ocrFile', { path: filePath }, signal)
+  async ocrFile(filePath: string, signal: AbortSignal, languages: string[] = []): Promise<Array<{ text: string; confidence: number; frame: Rect }>> {
+    const result = await this.request<WireOcrResult>('ocrFile', { path: filePath, languages }, signal)
     return result.observations
   }
 

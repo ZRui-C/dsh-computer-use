@@ -67,7 +67,7 @@ export class NativeDesktopDriver {
     const filePath = path.join(directory, `${Date.now()}-${Math.random().toString(36).slice(2)}.png`)
     await fs.writeFile(filePath, png, { mode: 0o600 })
     try {
-      return await this.client.ocrFile(filePath, execution.signal)
+      return await this.client.ocrFile(filePath, execution.signal, this.config.ocrLanguages)
     } finally {
       await fs.unlink(filePath).catch(() => undefined)
     }
@@ -96,6 +96,7 @@ export class NativeDesktopDriver {
     }
     const native = await this.client.observeDesktop({
       maxNodes: this.config.maxNodes,
+      ocrLanguages: this.config.ocrLanguages,
       ocr: request.ocr ?? 'auto',
       ...(screenshotPath === undefined ? {} : { screenshotPath }),
       ...(target === undefined ? {} : { target }),
@@ -141,7 +142,7 @@ export class NativeDesktopDriver {
       permissions: native.permissions,
       nodes,
       warnings,
-      truncated: native.nodes.length > this.config.maxNodes,
+      truncated: native.truncated === true || native.nodes.length > this.config.maxNodes,
       ...(finalScreenshotPath === undefined ? {} : { screenshotPath: finalScreenshotPath }),
     }
     this.latest.set(execution.sessionId, { snapshot, targets })
