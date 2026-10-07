@@ -2,6 +2,7 @@ import AppKit
 import ApplicationServices
 import CoreGraphics
 import SwiftUI
+import DSHComputerUseCore
 
 @MainActor
 enum SetupApplication {
@@ -25,8 +26,8 @@ private final class SetupAppDelegate: NSObject, NSApplicationDelegate {
         let controller = NSHostingController(rootView: content)
         let window = NSWindow(contentViewController: controller)
         window.title = "DSH Computer Use"
-        window.setContentSize(NSSize(width: 760, height: 620))
-        window.minSize = NSSize(width: 680, height: 560)
+        window.setContentSize(NSSize(width: 760, height: 720))
+        window.minSize = NSSize(width: 680, height: 660)
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
@@ -52,12 +53,20 @@ private final class SetupAppDelegate: NSObject, NSApplicationDelegate {
 
 @MainActor
 private final class SetupModel: ObservableObject {
+    @Published var target: DSHInstallationTarget = .web {
+        didSet {
+            message = nil
+            restartRequired = false
+            refresh()
+        }
+    }
     @Published var accessibilityGranted = false
     @Published var screenCaptureGranted = false
     @Published var dshExecutable: String?
     @Published var pluginInstalled = false
     @Published var pluginNeedsRepair = false
     @Published var isInstalling = false
+    @Published var isOpeningDesktop = false
     @Published var message: String?
     @Published var restartRequired = false
 
@@ -79,7 +88,7 @@ private final class SetupModel: ObservableObject {
 
     func refresh() {
         refreshPermissions()
-        let state = ProductInstaller.inspect()
+        let state = ProductInstaller.inspect(target: target)
         dshExecutable = state.dshExecutable
         pluginInstalled = state.pluginInstalled
         pluginNeedsRepair = state.pluginNeedsRepair
@@ -98,32 +107,49 @@ private final class SetupModel: ObservableObject {
         openPrivacyPane("Privacy_ScreenCapture")
     }
 
-    func configurePlugin() {
-        if dshExecutable == nil {
-            let panel = NSOpenPanel()
-            panel.title = Copy.chooseDSH
-            panel.prompt = Copy.choose
-            panel.canChooseDirectories = false
-            panel.canChooseFiles = true
-            panel.allowsMultipleSelection = false
-            guard panel.runModal() == .OK, let path = panel.url?.path else { return }
-            guard FileManager.default.isExecutableFile(atPath: path) else {
+    func chooseExecutable() {
+        guard !isInstalling && !isOpeningDesktop else { return }
+        let panel = NSOpenPanel()
+        panel.title = target == .desktop ? Copy.chooseDesktop : Copy.chooseDSH
+        panel.prompt = Copy.choose
+        panel.canChooseDirectories = target == .desktop
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let selection = panel.url else { return }
+        let path: String
+        if target == .desktop {
+            guard let app = ProductInstaller.desktopApplication(for: selection.path) else {
+                message = Copy.desktopMissing
+                return
+            }
+            path = DSHInstallationTarget.desktopLauncher(in: app).path
+        } else {
+            guard FileManager.default.isExecutableFile(atPath: selection.path) else {
                 message = Copy.notExecutable
                 return
             }
-            ProductInstaller.remember(dshExecutable: path)
-            dshExecutable = path
+            path = selection.path
         }
+        ProductInstaller.remember(dshExecutable: path, target: target)
+        dshExecutable = path
+        message = nil
+    }
+
+    func configurePlugin() {
+        guard !isInstalling && !isOpeningDesktop else { return }
+        if dshExecutable == nil { chooseExecutable() }
+        guard dshExecutable != nil else { return }
         installPlugin()
     }
 
     private func installPlugin() {
-        guard !isInstalling else { return }
+        guard !isInstalling && !isOpeningDesktop else { return }
         isInstalling = true
         message = nil
         let executable = dshExecutable
+        let selectedTarget = target
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = ProductInstaller.install(dshExecutable: executable)
+            let result = ProductInstaller.install(dshExecutable: executable, target: selectedTarget)
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 self.isInstalling = false
@@ -135,6 +161,24 @@ private final class SetupModel: ObservableObject {
     }
 
     func openDSH() {
+        guard !isInstalling && !isOpeningDesktop else { return }
+        if target == .desktop {
+            guard let executable = dshExecutable,
+                  let app = ProductInstaller.desktopApplication(for: executable) else {
+                message = Copy.desktopMissing
+                return
+            }
+            isOpeningDesktop = true
+            NSWorkspace.shared.openApplication(at: app, configuration: .init()) { _, error in
+                Task { @MainActor in
+                    self.isOpeningDesktop = false
+                    if let error, self.target == .desktop, self.dshExecutable == executable {
+                        self.message = error.localizedDescription
+                    }
+                }
+            }
+            return
+        }
         guard let url = URL(string: "http://127.0.0.1:3080") else { return }
         NSWorkspace.shared.open(url)
     }
@@ -158,6 +202,23 @@ private struct SetupView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+            HStack {
+                Picker(Copy.targetTitle, selection: $model.target) {
+                    Text(Copy.webTarget).tag(DSHInstallationTarget.web)
+                    Text(Copy.desktopTarget).tag(DSHInstallationTarget.desktop)
+                }
+                .pickerStyle(.menu)
+                Button(Copy.choose, action: model.chooseExecutable)
+            }
+            .disabled(model.isInstalling || model.isOpeningDesktop)
+            .padding(.horizontal, 30)
+            .padding(.bottom, 8)
+            Text(model.target == .desktop ? Copy.desktopInstructions : Copy.webInstructions)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 30)
+                .padding(.bottom, 12)
             Divider()
             VStack(spacing: 0) {
                 SetupRow(
@@ -188,7 +249,7 @@ private struct SetupView: View {
                         : (model.pluginInstalled
                             ? Copy.reinstall
                             : (model.pluginNeedsRepair ? Copy.repair : Copy.install)),
-                    busy: model.isInstalling,
+                    busy: model.isInstalling || model.isOpeningDesktop,
                     action: model.configurePlugin
                 )
             }
@@ -208,7 +269,7 @@ private struct SetupView: View {
             Divider()
             footer
         }
-        .frame(minWidth: 680, minHeight: 560)
+        .frame(minWidth: 680, minHeight: 660)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
@@ -242,18 +303,18 @@ private struct SetupView: View {
     }
 
     private var dshDetail: String {
-        if model.pluginInstalled { return Copy.dshInstalled }
+        if model.pluginInstalled { return model.target == .desktop ? Copy.desktopInstalled : Copy.dshInstalled }
         if model.pluginNeedsRepair { return Copy.dshNeedsRepair }
         if let path = model.dshExecutable {
             return Copy.dshFound.replacingOccurrences(of: "%@", with: path)
         }
-        return Copy.dshMissing
+        return model.target == .desktop ? Copy.desktopMissing : Copy.dshMissing
     }
 
     private var footer: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(model.restartRequired ? Copy.restartRequired : Copy.securityNote)
+                Text(model.restartRequired ? (model.target == .desktop ? Copy.desktopRestartRequired : Copy.restartRequired) : Copy.securityNote)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(Copy.version)
@@ -264,6 +325,7 @@ private struct SetupView: View {
             if model.pluginInstalled {
                 Button(Copy.openDSH, action: model.openDSH)
                     .buttonStyle(.bordered)
+                    .disabled(model.isInstalling || model.isOpeningDesktop)
             }
         }
         .padding(.horizontal, 30)
@@ -333,6 +395,15 @@ private enum Copy {
     static let accessibilityDetail = chinese ? "读取控件语义并向你选择的应用投递输入。" : "Reads control semantics and routes input to the app you selected."
     static let captureTitle = chinese ? "屏幕录制" : "Screen Recording"
     static let captureDetail = chinese ? "捕获窗口像素，用于 OCR 与动作后验证。" : "Captures window pixels for OCR and post-action verification."
+    static let targetTitle = chinese ? "安装到" : "Install into"
+    static let webTarget = "Web / DSH for Mac"
+    static let desktopTarget = chinese ? "官方 DeepSeek Harness App" : "Official DeepSeek Harness App"
+    static let webInstructions = chinese ? "使用 web profile；DSH for Mac 需连接这台 Mac 上的同一个 Host。" : "Uses the web profile. DSH for Mac must connect to this Mac's same Host."
+    static let desktopInstructions = chinese ? "使用独立的 desktop profile。先打开官方 App 一次，再用 ⌘Q 完全退出后安装。" : "Uses the separate desktop profile. Open the official app once, then fully quit with Command-Q before installing."
+    static let chooseDesktop = chinese ? "选择官方 DeepSeek Harness.app 或其内置 dsh" : "Choose the official DeepSeek Harness.app or its bundled dsh"
+    static let desktopMissing = chinese ? "未找到官方 App 内置命令。请选择已安装的 DeepSeek Harness.app。" : "The official app's bundled command was not found. Choose the installed DeepSeek Harness.app."
+    static let desktopInstalled = chinese ? "插件已在 desktop profile 启用。" : "The plugin is enabled in the desktop profile."
+    static let desktopRestartRequired = chinese ? "插件已更新。请重新打开官方 DeepSeek Harness App。" : "Plugin updated. Reopen the official DeepSeek Harness app."
     static let dshTitle = chinese ? "DSH 插件" : "DSH Plugin"
     static let dshMissing = chinese ? "未找到 dsh 命令。请先安装 DeepSeek Harness。" : "The dsh command was not found. Install DeepSeek Harness first."
     static let dshInstalled = chinese ? "插件已全局启用，所有 agent preset 均可使用。" : "The plugin is globally enabled for every agent preset."

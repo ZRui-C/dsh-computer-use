@@ -32,3 +32,17 @@ jobs:
         run: |
           lipo -archs 'native/macos-helper/dist/DSH Computer Use.app/Contents/MacOS/DSHComputerUse'
           codesign --verify --deep --strict 'native/macos-helper/dist/DSH Computer Use.app'
+
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dsh: ['0.1.0-rc.6', '0.2.0-rc.2', '0.2.1-alpha.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/test-compat.mjs '${{ matrix.dsh }}'
